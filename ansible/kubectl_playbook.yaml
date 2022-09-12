@@ -1,0 +1,18 @@
+---
+- name: Install docker repository
+  hosts: aws
+  become: true
+
+  tasks:
+    - name: Download kubectl binary
+      get_url:
+        url: "https://dl.k8s.io/release/v1.25.0/bin/linux/amd64/kubectl"
+        dest: /usr/bin/
+        group: root
+        owner: root
+        mode: '0755'
+
+    - name: Install kubectl
+      shell:
+        /usr/bin/kubectl
+      become: true

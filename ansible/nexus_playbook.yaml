@@ -1,0 +1,69 @@
+---
+- name: Install nexus repository
+  hosts: aws
+  become: true
+
+  tasks:
+    - name: Copy nexus configs to ec2
+      copy:
+        src: ./nexus/nexus-data.zip
+        dest: /home/ubuntu/
+
+    - name: Extract nexus configs
+      unarchive:
+        src: /home/ubuntu/nexus-data.zip
+        dest: /home/ubuntu/
+        owner: 200
+        group: 200
+        remote_src: yes
+
+    - name: Create custom network
+      docker_network:
+        name: custom
+
+    - name: Create Nexus container
+      docker_container:
+        name: nexus
+        image: sonatype/nexus3:latest
+        restart_policy: unless-stopped
+        volumes:
+          - /home/ubuntu/nexus-data:/nexus-data
+        state: started
+        networks:
+          - name: custom
+        ports: 
+          - 8081:8081
+
+    - name: Create nginx-conf directory on ec2
+      file:
+        path: /home/ubuntu/nginx-conf/
+        state: directory
+        owner: ubuntu
+        mode: '0755'
+
+    - name: Copy nginx configs to ec2
+      copy:
+        src: ./nginx/nginx-conf.zip
+        dest: /home/ubuntu/
+
+    - name: Extract nginx configs
+      unarchive:
+        src: /home/ubuntu/nginx-conf.zip
+        dest: /home/ubuntu/
+        owner: ubuntu
+        group: ubuntu
+        remote_src: yes
+    
+    - name: Create Nginx container
+      docker_container:
+        name: nginx-proxy
+        image: nginx:stable
+        restart_policy: unless-stopped
+        volumes:
+          - /home/ubuntu/nginx-conf/:/etc/nginx/conf.d/
+        state: started
+        networks:
+          - name: custom
+        ports: 
+          - 80:80
+          - 443:443
