@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Enter to terraform directory
+
+cd teraform/
+
+if [[ $? != 0 ]]
+then
+exit 1 && echo "something went wrong while entering to terraform directory"
+fi
+
 # initialize terraform backend 
 
 terraform init
@@ -20,7 +29,7 @@ fi
 
 # Pass Ops instance public ip to ansible inventori
 
-echo -e "[aws]\n$(terraform output | grep ip | cut -d '"' -f 2)" > ./ansible/inventory.ini
+echo -e "[aws]\n$(terraform output | grep ip | cut -d '"' -f 2)" > ../ansible/inventory.ini
 
 if [[ $? != 0 ]]
 then
@@ -29,7 +38,7 @@ fi
 
 # Enter to ansible directory
 
-cd ansible/
+cd ../ansible/
 
 if [[ $? != 0 ]]
 then
@@ -38,7 +47,7 @@ fi
 
 # Configure Ops server and install nessessary programs
 
-ansible-playbook config_playbook.yaml -e github_token=$(cat ../github_token.txt)
+ansible-playbook config_playbook.yaml -e github_token=$(cat ./github_token.txt)
 
 if [[ $? != 0 ]]
 then
