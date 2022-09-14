@@ -66,6 +66,6 @@ You need also
 
 - Create github access token with repo access and store it in "github_token.txt" file in ansible directory
 
-- Create public and private ssh keys for creating ec2 instance and store in terraform directory
+- Create public and private ssh keys (do it with ssh-keygen program with name "server_key") and store in terraform directory
 
 Finnaly execute run.sh and manually input db password and use same password to create secret in github action.
